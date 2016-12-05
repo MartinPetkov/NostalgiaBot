@@ -5,7 +5,11 @@
 #   nostalgiabot (Remind me of|Quote) <person> - Digs up a memorable quote from the past.
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
-#   nostalgiabot Make <person1> talk to <person2> - 
+#   nostalgiabot Make <person1> talk to <person2> - Start a nonsensical convo
+#   nostalgiabot Start Guess Who - Start a game of Guess Who!
+#   nostalgiabot Show Guess Who - Show the current quote to guess
+#   nostalgiabot Guess <person> - Guess who said the current quote. Ends when guessed correctly.
+#   nostalgiabot End Guess Who - End the game of Guess Who!
 #   nostalgiabot Hacker me - Get a 100% real quote from a professional hacker.
 #   nostalgiabot BS me - Get a technobable quote that sounds almost real.
 #   nostalgiabot stats - See how memorable everyone is
@@ -49,7 +53,7 @@ msgRespond = (res) ->
             d = new Date()
             randomQuote = randomQuote.replace('$current_day', weekday[d.getDay()]) 
 
-        res.send "\"" + randomQuote + "\" - #{displayName}"
+        res.send "\"#{randomQuote}\" - #{displayName}"
     else
         res.send "I don't remember #{displayName}"
 
@@ -113,6 +117,41 @@ rememberPerson = (res) ->
 
         res.send "Memory stored!"
 
+guessWhoPlaying = false
+guessWhoTarget = ''
+guessWhoQuote = ''
+startGuessWhoRespond = (res) ->
+    guessWhoPlaying = true
+    res.send "Guess Who game started!"
+
+    guessWhoTarget = res.random Object.keys(memories)
+    guessWhoQuote = res.random memories[guessWhoTarget]
+    res.send "Who said \"#{guessWhoQuote}\"?"
+
+showGuessWhoQuoteRespond = (res) ->
+    if guessWhoPlaying
+        res.send "Who said \"#{guessWhoQuote}\"?"
+    else
+        res.send "You are not playing Guess Who right now"
+
+guessRespond = (res) ->
+    senderName = res.message.user.name
+    guess = res.match[1].toLowerCase().trim()
+    if guessWhoPlaying
+        if guess == guessWhoTarget
+            res.send "Correct! #{toTitleCase senderName} correctly guessed that #{toTitleCase guessWhoTarget} said \"#{guessWhoQuote}\""
+            endGuessWhoRespond res
+        else
+            res.send "Wrong! Try again"
+    else
+        res.send "You are not playing Guess Who right now"
+
+endGuessWhoRespond = (res) ->
+    guessWhoPlaying = false
+    guessWhoTarget = ''
+    guessWhoQuote = ''
+    res.send "Guess Who game over"
+
 module.exports = (robot) ->
     robot.respond /Remember that (.*) said "(.*)"/i, rememberPerson
 
@@ -128,6 +167,11 @@ module.exports = (robot) ->
         res.send Object.keys(memories)
 
     robot.respond /stats/i, statsRespond
+
+    robot.respond /start guess who/i, startGuessWhoRespond
+    robot.respond /show guess who/i, showGuessWhoQuoteRespond
+    robot.respond /guess (.*)/i, guessRespond
+    robot.respond /end guess who/i, endGuessWhoRespond
 
     robot.hear /.*I found a bug.*/i, (res) ->
         res.send "There are no bugs, just happy little accidents!"
