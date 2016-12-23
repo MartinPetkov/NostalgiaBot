@@ -5,7 +5,7 @@
 #   nostalgiabot (Remind me of|Quote) <person> - Digs up a memorable quote from the past.
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
-#   nostalgiabot Make <person1> talk to <person2> - Start a nonsensical convo
+#   nostalgiabot Start convo <person1>, <person2>(, <person3>...) - Start a nonsensical convo
 #   nostalgiabot Start Guess Who - Start a game of Guess Who!
 #   nostalgiabot Show Guess Who - Show the current quote to guess
 #   nostalgiabot Guess <person> - Guess who said the current quote. Ends when guessed correctly.
@@ -58,21 +58,32 @@ msgRespond = (res) ->
         res.send "I don't remember #{displayName}"
 
 convoRespond = (res) ->
-    name1 = res.match[1].toLowerCase().trim()
-    name2 = res.match[2].toLowerCase().trim()
+    allNames = (res.match[1].toLowerCase().trim() + " " + res.match[2].toLowerCase().trim()).split(",")
 
-    if !(name1 of memories)
-        res.send "I don't recognize #{name1}"
-    else if !(name2 of memories)
-        res.send "I don't recognize #{name2}"
-    else
-        convo = ""
-        for i in [0...2]
-            convo += "#{name1}: " + (res.random memories[name1]) + "\n"
-            convo += "#{name2}: " + (res.random memories[name2]) + "\n"
+    # Generate quotes
+    convoLines = []
+    for name in allNames
+        name = name.toLowerCase().trim()
+        if !(name of memories)
+            res.send "I don't recognize #{name}"
+            return
 
-        res.send convo
-        
+        convoLines.push "#{name}: " + (res.random memories[name])
+        convoLines.push "#{name}: " + (res.random memories[name])
+
+
+    # Shuffle quotes
+    i = convoLines.length
+    while --i
+        j = Math.floor(Math.random() * (i+1))
+        [convoLines[i], convoLines[j]] = [convoLines[j], convoLines[i]] # use pattern matching to swap
+
+    # Assemble quotes
+    convo = ""
+    for line in convoLines
+        convo += line + "\n"
+
+    res.send convo
 
 hackerRespond = (res) ->
     hackerUrl = "https://hacker.actor/quote"
@@ -158,7 +169,7 @@ module.exports = (robot) ->
     robot.respond /Remind me of (.*)/i, msgRespond
     robot.respond /Quote (.*)/i, msgRespond
 
-    robot.respond /Make (.*) talk to (.*)/i, convoRespond
+    robot.respond /Start convo (.*)( *, *.*)+/i, convoRespond
 
     robot.respond /Hacker me/i, hackerRespond
     robot.respond /BS me/i, bsRespond
