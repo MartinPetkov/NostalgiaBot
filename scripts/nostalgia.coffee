@@ -88,7 +88,10 @@ convoRespond = (res) ->
 hackerRespond = (res) ->
     hackerUrl = "https://hacker.actor/quote"
     request.get {uri:"#{hackerUrl}", json: true}, (err, r, data) ->
-        res.send "\"#{data.quote}\" - l33t h4xx0r"
+        if err
+            res.send "The Hackers are too busy stealing your data to provide a quote"
+        else
+            res.send "\"#{data.quote}\" - l33t h4xx0r"
 
 bsRespond = (res) ->
     # From http://www.atrixnet.com/bs-generator.html
