@@ -5,7 +5,7 @@
 #   nostalgiabot (Remind me of|Quote) <person> - Digs up a memorable quote from the past.
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
-#   nostalgiabot Start convo <person1>, <person2>(, <person3>...) - Start a nonsensical convo
+#   nostalgiabot Start convo with <person1>, <person2>(, <person3>...) - Start a nonsensical convo
 #   nostalgiabot Start Guess Who - Start a game of Guess Who!
 #   nostalgiabot Show Guess Who - Show the current quote to guess
 #   nostalgiabot Guess <person> - Guess who said the current quote. Ends when guessed correctly.
@@ -172,7 +172,7 @@ module.exports = (robot) ->
     robot.respond /Remind me of (.*)/i, msgRespond
     robot.respond /Quote (.*)/i, msgRespond
 
-    robot.respond /Start convo (.*)( *, *.*)+/i, convoRespond
+    robot.respond /Start convo with (.*)( *, *.*)+/i, convoRespond
 
     robot.respond /Hacker me/i, hackerRespond
     robot.respond /BS me/i, bsRespond
