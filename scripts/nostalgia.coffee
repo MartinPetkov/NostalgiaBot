@@ -12,6 +12,7 @@
 #   nostalgiabot End Guess Who - End the game of Guess Who!
 #   nostalgiabot Hacker me - Get a 100% real quote from a professional hacker.
 #   nostalgiabot BS me - Get a technobable quote that sounds almost real.
+#   nostalgiabot Commit message me - Generate your next commit message
 #   nostalgiabot stats - See how memorable everyone is
 #
 # Author:
@@ -93,9 +94,20 @@ hackerRespond = (res) ->
         else
             res.send "\"#{data.quote}\" - l33t h4xx0r"
 
+commitMessageRespond = (res) ->
+    commitMessageUrl = "http://www.whatthecommit.com/index.txt"
+    request.get {uri:"#{commitMessageUrl}", json: true}, (err, r, data) ->
+        if err
+            res.send "Too busy coding to generate a message"
+        else
+            res.send "#{data}"
+
 bsRespond = (res) ->
     # From http://www.atrixnet.com/bs-generator.html
     res.send "\"" + toTitleCase generateBS() + "\" - Lead Synergist"
+
+yoloRespond = (res) ->
+    res.send "alias yolo='git commit -am \"DEAL WITH IT\" && git push -f origin master'"
 
 statsRespond = (res) ->
     stats = "Memories made:\n"
@@ -176,6 +188,8 @@ module.exports = (robot) ->
 
     robot.respond /Hacker me/i, hackerRespond
     robot.respond /BS me/i, bsRespond
+    robot.respond /Commit message me/i, commitMessageRespond
+    robot.respond /YOLO/i, yoloRespond
 
     robot.respond /Who do you remember\??/i, (res) ->
         res.send Object.keys(memories)
