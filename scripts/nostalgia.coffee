@@ -14,6 +14,7 @@
 #   nostalgiabot BS me - Get a technobable quote that sounds almost real.
 #   nostalgiabot Commit message me - Generate your next commit message
 #   nostalgiabot stats - See how memorable everyone is
+#   nostalgiabot ? - Ring the nostalgiaphone
 #
 # Author:
 #   MartinPetkov
@@ -195,6 +196,9 @@ module.exports = (robot) ->
         res.send Object.keys(memories)
 
     robot.respond /stats/i, statsRespond
+
+    robot.respond /( \?)/i, (res) ->
+        res.send 'You rang?'
 
     robot.respond /start guess who/i, startGuessWhoRespond
     robot.respond /show guess who/i, showGuessWhoQuoteRespond
