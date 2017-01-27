@@ -205,7 +205,7 @@ module.exports = (robot) ->
     robot.respond /guess (.*)/i, guessRespond
     robot.respond /end guess who/i, endGuessWhoRespond
 
-    robot.hear /.*I found a bug.*/i, (res) ->
+    robot.hear /.*a bug.*/i, (res) ->
         res.send "There are no bugs, just happy little accidents!"
         res.send "http://a2.files.biography.com/image/upload/c_fit,cs_srgb,dpr_1.0,q_80,w_620/MTI1NDg4NTg2MDAxODA1Mjgy.jpg"
 
