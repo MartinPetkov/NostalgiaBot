@@ -179,6 +179,19 @@ endGuessWhoRespond = (res) ->
     guessWhoQuote = ''
     res.send "Guess Who game over"
 
+
+bobRossOnVacation = false
+returnFromVacation = () ->
+    bobRossOnVacation = false
+
+bobRossRespond = (res) ->
+    if !(bobRossOnVacation)
+        res.send "There are no bugs, just happy little accidents!"
+        res.send "http://a2.files.biography.com/image/upload/c_fit,cs_srgb,dpr_1.0,q_80,w_620/MTI1NDg4NTg2MDAxODA1Mjgy.jpg"
+
+        bobRossOnVacation = true
+        setTimeout(returnFromVacation, 600000) # 10min
+
 module.exports = (robot) ->
     robot.respond /Remember that (.*) said "(.*)"/i, rememberPerson
 
@@ -205,9 +218,7 @@ module.exports = (robot) ->
     robot.respond /guess (.*)/i, guessRespond
     robot.respond /end guess who/i, endGuessWhoRespond
 
-    robot.hear /.*a bug.*/i, (res) ->
-        res.send "There are no bugs, just happy little accidents!"
-        res.send "http://a2.files.biography.com/image/upload/c_fit,cs_srgb,dpr_1.0,q_80,w_620/MTI1NDg4NTg2MDAxODA1Mjgy.jpg"
+    robot.hear /.*a bug.*/i, bobRossRespond
 
 `// All code below from http://www.atrixnet.com/bs-generator.html, I take no credit for it
 function randomarray(a) {
