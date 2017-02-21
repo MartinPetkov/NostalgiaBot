@@ -5,7 +5,8 @@
 #   nostalgiabot (Remind me of|Quote) <person> - Digs up a memorable quote from the past.
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
-#   nostalgiabot Start convo with <person1>, <person2>(, <person3>...) - Start a nonsensical convo
+#   nostalgiabot Start convo with <person1>, <person2> [, <person3>...] - Start a nonsensical convo
+#   nostalgiabot Alias <name> as <alias1> [<alias2> ...] - Add nicknames to the memorees
 #   nostalgiabot Start Guess Who - Start a game of Guess Who!
 #   nostalgiabot Show Guess Who - Show the current quote to guess
 #   nostalgiabot Guess <person> - Guess who said the current quote. Ends when guessed correctly.
@@ -13,6 +14,7 @@
 #   nostalgiabot Hacker me - Get a 100% real quote from a professional hacker.
 #   nostalgiabot BS me - Get a technobable quote that sounds almost real.
 #   nostalgiabot Commit message me - Generate your next commit message
+#   nostalgiabot Remember past - Gather memories from the past
 #   nostalgiabot stats - See how memorable everyone is
 #   nostalgiabot ? - Ring the nostalgiaphone
 #
@@ -26,7 +28,7 @@ toTitleCase = (str) ->
     str.replace /\w\S*/g, (txt) ->
         txt[0].toUpperCase() + txt[1..txt.length - 1].toLowerCase()
 
-memoryDir = "memories"
+memoryDir = "./memories"
 
 weekday = new Array(7);
 weekday[0]=  "Sunday";
@@ -39,12 +41,16 @@ weekday[6] = "Saturday";
 
 memories = {}
 
-quoteFiles = fs.readdirSync memoryDir
-for quoteFile in quoteFiles
-    do (quoteFile) ->
-        name = "#{quoteFile}".toString().toLowerCase().trim()
-        quotes = (fs.readFileSync "#{memoryDir}/#{quoteFile}", 'utf8').toString().split("\n").filter(Boolean)
-        memories[name] = quotes
+rememberPast = () ->
+    memories = {}
+    quoteFiles = fs.readdirSync memoryDir
+    for quoteFile in quoteFiles
+        do (quoteFile) ->
+            name = "#{quoteFile}".toString().toLowerCase().trim()
+            quotes = (fs.readFileSync "#{memoryDir}/#{quoteFile}", 'utf8').toString().split("\n").filter(Boolean)
+            memories[name] = quotes
+
+rememberPast()
 
 msgRespond = (res) ->
     nostalgiaName = res.match[1].toLowerCase().trim()
@@ -87,6 +93,25 @@ convoRespond = (res) ->
 
     res.send convo
 
+aliasRespond = (res) ->
+    regularName = res.match[1].toLowerCase().trim()
+    aliases = res.match[2].toLowerCase().trim().split(" ")
+
+    if !(regularName of memories)
+        res.send "Could not find #{regularName} in vast memory bank"
+        return
+
+    for alias in aliases
+        if alias of memories
+            res.send "Alias \"#{alias}\" already exists as a separate memory"
+        else
+            process.chdir(memoryDir)
+            fs.symlinkSync(regularName, alias)
+            res.send "Aliased #{regularName} as #{alias}!"
+            process.chdir('..')
+
+    rememberPast()
+
 hackerRespond = (res) ->
     hackerUrl = "https://hacker.actor/quote"
     request.get {uri:"#{hackerUrl}", json: true}, (err, r, data) ->
@@ -109,6 +134,10 @@ bsRespond = (res) ->
 
 yoloRespond = (res) ->
     res.send "alias yolo='git commit -am \"DEAL WITH IT\" && git push -f origin master'"
+
+rememberPastRespond = (res) ->
+    rememberPast()
+    res.send "All memories have been gathered!"
 
 statsRespond = (res) ->
     stats = "Memories made:\n"
@@ -143,6 +172,8 @@ rememberPerson = (res) ->
                 fs.appendFileSync(quotePath, "#{q}\n")
 
         res.send "Memory stored!"
+
+        rememberPast()
 
 guessWhoPlaying = false
 guessWhoTarget = ''
@@ -192,26 +223,32 @@ bobRossRespond = (res) ->
         bobRossOnVacation = true
         setTimeout(returnFromVacation, 600000) # 10min
 
+whoDoYouRememberRespond = (res) ->
+    res.send Object.keys(memories)
+
+nostalgiaphoneRespond = (res) ->
+    res.send 'You rang?'
+
 module.exports = (robot) ->
     robot.respond /Remember that (.*) said "(.*)"/i, rememberPerson
 
     robot.respond /Remind me of (.*)/i, msgRespond
     robot.respond /Quote (.*)/i, msgRespond
 
-    robot.respond /Start convo with (.*)( *, *.*)+/i, convoRespond
+    robot.respond /Start convo with (\S+)( *, *.+)+/i, convoRespond
+    robot.respond /Alias (\S+) as ( *.+)+/i, aliasRespond
 
     robot.respond /Hacker me/i, hackerRespond
     robot.respond /BS me/i, bsRespond
     robot.respond /Commit message me/i, commitMessageRespond
     robot.respond /YOLO/i, yoloRespond
 
-    robot.respond /Who do you remember\??/i, (res) ->
-        res.send Object.keys(memories)
+    robot.respond /Who do you remember\??/i, whoDoYouRememberRespond
 
+    robot.respond /Remember Past/i, rememberPastRespond
     robot.respond /stats/i, statsRespond
 
-    robot.respond /( \?)/i, (res) ->
-        res.send 'You rang?'
+    robot.respond /( +\?)/i, nostalgiaphoneRespond
 
     robot.respond /start guess who/i, startGuessWhoRespond
     robot.respond /show guess who/i, showGuessWhoQuoteRespond
