@@ -10,7 +10,8 @@
 #   nostalgiabot Start Guess Who - Start a game of Guess Who!
 #   nostalgiabot Show Guess Who - Show the current quote to guess
 #   nostalgiabot Guess <person> - Guess who said the current quote. Ends when guessed correctly.
-#   nostalgiabot End Guess Who - End the game of Guess Who!
+#   nostalgiabot End Guess Who - End the game of Guess Who!.
+#   nostalgiabot Give up - End the game of Guess Who! and get the answer.
 #   nostalgiabot Hacker me - Get a 100% real quote from a professional hacker.
 #   nostalgiabot BS me - Get a technobable quote that sounds almost real.
 #   nostalgiabot Commit message me - Generate your next commit message
@@ -65,31 +66,53 @@ msgRespond = (res) ->
     else
         res.send "I don't remember #{displayName}"
 
+shuffleNames = (names) ->
+    i = names.length
+    while --i
+        j = Math.floor(Math.random() * (i+1))
+        [names[i], names[j]] = [names[j], names[i]] # use pattern matching to swap
+
+    return names
+
 convoRespond = (res) ->
     allNames = (res.match[1].toLowerCase().trim() + " " + res.match[2].toLowerCase().trim()).split(",")
-
-    # Generate quotes
-    convoLines = []
+    fixedNames = []
     for name in allNames
         name = name.toLowerCase().trim()
+        fixedNames.push name
+    allNames = fixedNames
+
+    # Generate quotes
+    convoMap = {}
+    for name in allNames
         if !(name of memories)
             res.send "I don't recognize #{name}"
             return
 
-        convoLines.push "#{name}: " + (res.random memories[name])
-        convoLines.push "#{name}: " + (res.random memories[name])
+        firstQuote = (res.random memories[name])
+        secondQuote = (res.random memories[name])
+        while secondQuote == firstQuote
+            secondQuote = (res.random memories[name])
 
+        personQuotes = []
+        personQuotes.push "#{name}: " + firstQuote
+        personQuotes.push "#{name}: " + secondQuote
+        convoMap[name] = personQuotes
 
-    # Shuffle quotes
-    i = convoLines.length
-    while --i
-        j = Math.floor(Math.random() * (i+1))
-        [convoLines[i], convoLines[j]] = [convoLines[j], convoLines[i]] # use pattern matching to swap
+    allNames = Object.keys(convoMap)
 
     # Assemble quotes
     convo = ""
-    for line in convoLines
-        convo += line + "\n"
+    lastName = ""
+    i = 2
+    while i--
+        allNames = shuffleNames(allNames)
+        while allNames[0] == lastName && allNames.length > 1
+            allNames = shuffleNames(allNames)
+        lastName = allNames[allNames.length-1]
+
+        for name in allNames
+            convo += convoMap[name][i] + "\n"
 
     res.send convo
 
@@ -210,6 +233,10 @@ endGuessWhoRespond = (res) ->
     guessWhoQuote = ''
     res.send "Guess Who game over"
 
+giveUpRespond = (res) ->
+    res.send "You gave up! #{toTitleCase guessWhoTarget} said \"#{guessWhoQuote}\""
+    endGuessWhoRespond(res)
+
 
 bobRossOnVacation = false
 returnFromVacation = () ->
@@ -254,6 +281,7 @@ module.exports = (robot) ->
     robot.respond /show guess who/i, showGuessWhoQuoteRespond
     robot.respond /guess (.*)/i, guessRespond
     robot.respond /end guess who/i, endGuessWhoRespond
+    robot.respond /give up/i, giveUpRespond
 
     robot.hear /.*a bug.*/i, bobRossRespond
 
