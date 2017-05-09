@@ -245,10 +245,10 @@ returnFromVacation = () ->
 bobRossRespond = (res) ->
     if !(bobRossOnVacation)
         res.send "There are no bugs, just happy little accidents!"
-        res.send "http://a2.files.biography.com/image/upload/c_fit,cs_srgb,dpr_1.0,q_80,w_620/MTI1NDg4NTg2MDAxODA1Mjgy.jpg"
+        res.send "http://s.newsweek.com/sites/www.newsweek.com/files/2014/09/29/1003bobrosstoc.jpg"
 
         bobRossOnVacation = true
-        setTimeout(returnFromVacation, 600000) # 10min
+        setTimeout(returnFromVacation, 3600000) # 1h
 
 whoDoYouRememberRespond = (res) ->
     res.send Object.keys(memories)
