@@ -174,7 +174,7 @@ rememberPerson = (res) ->
     newQuote = res.match[2]
 
     # Make sure the messages don't contain non-alphabetical characters
-    if /.*[^a-zA-Z_0-9 ].*/.test(nostalgiaName)
+    if /.*[^a-zA-Z_0-9 @].*/.test(nostalgiaName)
         res.send "I can't remember names with fancy symbols and characters"
     else
         quotePath = "#{memoryDir}/#{nostalgiaName}"
