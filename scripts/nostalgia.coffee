@@ -91,8 +91,9 @@ convoRespond = (res) ->
 
         firstQuote = (res.random memories[name])
         secondQuote = (res.random memories[name])
-        while secondQuote == firstQuote
-            secondQuote = (res.random memories[name])
+        if memories[name].length > 1
+            while secondQuote == firstQuote
+                secondQuote = (res.random memories[name])
 
         personQuotes = []
         personQuotes.push "#{name}: " + firstQuote
@@ -283,7 +284,7 @@ module.exports = (robot) ->
     robot.respond /end guess who/i, endGuessWhoRespond
     robot.respond /give up/i, giveUpRespond
 
-    robot.hear /.*a bug.*/i, bobRossRespond
+    robot.hear /.*that's a bug.*/i, bobRossRespond
 
 `// All code below from http://www.atrixnet.com/bs-generator.html, I take no credit for it
 function randomarray(a) {
