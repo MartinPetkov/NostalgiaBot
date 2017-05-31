@@ -258,7 +258,7 @@ nostalgiaphoneRespond = (res) ->
     res.send 'You rang?'
 
 module.exports = (robot) ->
-    robot.respond /Remember (?:that )?(.+) said "([^"]+)"/i, rememberPerson
+    robot.respond /Remember +(?:that )?(.+) +said +"([^"]+)"/i, rememberPerson
 
     robot.respond /Remind me of (.*)/i, msgRespond
     robot.respond /Quote (.*)/i, msgRespond
