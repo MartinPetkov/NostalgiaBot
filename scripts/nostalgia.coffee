@@ -25,6 +25,12 @@
 fs = require 'fs'
 request = require 'request'
 
+adminsFile = 'admins.json'
+loadFile = (fileName) ->
+    return JSON.parse((fs.readFileSync fileName, 'utf8').toString().trim())
+
+admins = loadFile(adminsFile)
+
 toTitleCase = (str) ->
     str.replace /\w\S*/g, (txt) ->
         txt[0].toUpperCase() + txt[1..txt.length - 1].toLowerCase()
@@ -56,15 +62,21 @@ rememberPast()
 msgRespond = (res) ->
     nostalgiaName = res.match[1].toLowerCase().trim()
     displayName = toTitleCase(nostalgiaName)
-    if nostalgiaName of memories
-        randomQuote = (res.random memories[nostalgiaName])
-        if (randomQuote.indexOf('$current_day') > 0)
-            d = new Date()
-            randomQuote = randomQuote.replace('$current_day', weekday[d.getDay()]) 
-
-        res.send "\"#{randomQuote}\" - #{displayName}"
-    else
+    if ! (nostalgiaName of memories)
         res.send "I don't remember #{displayName}"
+        return
+
+    randomQuote = (res.random memories[nostalgiaName])
+
+    if ! randomQuote
+        res.send "No memories to remember"
+        return
+
+    if (randomQuote.indexOf('$current_day') > 0)
+        d = new Date()
+        randomQuote = randomQuote.replace('$current_day', weekday[d.getDay()])
+
+    res.send "\"#{randomQuote}\" - #{displayName}"
 
 shuffleNames = (names) ->
     i = names.length
@@ -170,6 +182,16 @@ statsRespond = (res) ->
 
     res.send stats
 
+saveQuotes = (nostalgiaName) ->
+    quotePath = "#{memoryDir}/#{nostalgiaName}"
+    quotes = memories[nostalgiaName]
+
+    # Write entire list of quotes to quotePath
+    fs.writeFileSync(quotePath, '')
+    for q in quotes
+        do (q) ->
+            fs.appendFileSync(quotePath, "#{q}\n")
+
 rememberPerson = (res) ->
     nostalgiaName = res.match[1].toLowerCase().trim()
     newQuote = res.match[2]
@@ -178,8 +200,6 @@ rememberPerson = (res) ->
     if /.*[^a-zA-Z_0-9 @].*/.test(nostalgiaName)
         res.send "I can't remember names with fancy symbols and characters"
     else
-        quotePath = "#{memoryDir}/#{nostalgiaName}"
-
         if !(nostalgiaName of memories)
             memories[nostalgiaName] = []
 
@@ -189,15 +209,88 @@ rememberPerson = (res) ->
             quotes.push(newQuote)
         memories[nostalgiaName] = quotes
 
-        # Write entire list of quotes to quotePath
-        fs.writeFileSync(quotePath, '')
-        for q in quotes
-            do (q) ->
-                fs.appendFileSync(quotePath, "#{q}\n")
+        saveQuotes(nostalgiaName)
 
         res.send "Memory stored!"
 
         rememberPast()
+
+
+# Admin functions
+forgetPersonRespond = (res) ->
+    senderName = res.message.user.name
+    if ! (senderName in admins)
+        res.send "You must be an admin to perform this function"
+        return
+
+    nostalgiaName = res.match[1].toLowerCase().trim()
+
+    if ! (nostalgiaName of memories)
+        res.send "I don't remember #{nostalgiaName}"
+        return
+
+    # Delete the file with memories
+    quotePath = "#{memoryDir}/#{nostalgiaName}"
+    fs.unlinkSync(quotePath)
+    rememberPast()
+
+    res.send "#{nostalgiaName} forgotten forever :'("
+
+forgetMemoryRespond = (res) ->
+    senderName = res.message.user.name
+    if ! (senderName in admins)
+        res.send "You must be an admin to perform this function"
+        return
+
+    nostalgiaName = res.match[1].toLowerCase().trim()
+    if ! (nostalgiaName of memories)
+        res.send "I don't remember #{nostalgiaName}"
+        return
+
+    quoteToForget = res.match[2]
+    if ! (quoteToForget in memories[nostalgiaName])
+        res.send "I don't remember #{nostalgiaName} saying \"#{quoteToForget}\""
+        return
+
+    memories[nostalgiaName].splice(memories[nostalgiaName].indexOf(quoteToForget), 1)
+    saveQuotes(nostalgiaName)
+
+    rememberPast()
+
+    res.send "Forgot that #{nostalgiaName} said \"#{quoteToForget}\""
+
+reattributeRespond = (res) ->
+    senderName = res.message.user.name
+    if ! (senderName in admins)
+        res.send "You must be an admin to perform this function"
+        return
+
+    quote = res.match[1]
+    oldName = res.match[2].toLowerCase().trim()
+    if ! (oldName of memories)
+        res.send "I don't remember #{oldName}"
+        return
+
+    if ! (quote in memories[oldName])
+        res.send "I don't remember #{oldName} saying \"#{quote}\""
+        return
+
+    newName = res.match[3].toLowerCase().trim()
+    if ! (newName of memories)
+        res.send "I don't remember #{newName}"
+        return
+
+    # Actually move the quote over
+    memories[oldName].splice(memories[oldName].indexOf(quote), 1)
+    if (memories[newName].indexOf(quote) < 0)
+        memories[newName].push(quote)
+    saveQuotes(oldName)
+    saveQuotes(newName)
+
+    rememberPast()
+
+    res.send "Quote \"#{quote}\" reattributed from #{oldName} to #{newName}"
+
 
 guessWhoPlaying = false
 guessWhoTarget = ''
@@ -259,6 +352,11 @@ nostalgiaphoneRespond = (res) ->
 
 module.exports = (robot) ->
     robot.respond /Remember +(?:that )?(.+) +said +"([^"]+)"/i, rememberPerson
+
+    # Admin functions
+    robot.respond /Forget (\S+)$/i, forgetPersonRespond
+    robot.respond /Forget that (.+) +said +"([^"]+)"$/i, forgetMemoryRespond
+    robot.respond /Reattribute "([^"]+)" from (.+) to (.+)/i, reattributeRespond
 
     robot.respond /Remind me of (.*)/i, msgRespond
     robot.respond /Quote (.*)/i, msgRespond
