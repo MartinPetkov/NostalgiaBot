@@ -3,6 +3,7 @@
 #
 # Commands:
 #   nostalgiabot (Remind me of|Quote) <person> - Digs up a memorable quote from the past.
+#   nostalgiabot Random quote - Dig up random memory from random person
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
 #   nostalgiabot Start convo with <person1>, <person2> [, <person3>...] - Start a nonsensical convo
@@ -59,8 +60,7 @@ rememberPast = () ->
 
 rememberPast()
 
-msgRespond = (res) ->
-    nostalgiaName = res.match[1].toLowerCase().trim()
+randomQuoteRespond = (res, nostalgiaName) ->
     displayName = toTitleCase(nostalgiaName)
     if ! (nostalgiaName of memories)
         res.send "I don't remember #{displayName}"
@@ -77,6 +77,18 @@ msgRespond = (res) ->
         randomQuote = randomQuote.replace('$current_day', weekday[d.getDay()])
 
     res.send "\"#{randomQuote}\" - #{displayName}"
+
+msgRespond = (res) ->
+    nostalgiaName = res.match[1].toLowerCase().trim()
+
+    randomQuoteRespond(res, nostalgiaName)
+
+randomNameAndQuoteRespond = (res) ->
+    names = (name for name of memories)
+    nostalgiaName = res.random names
+
+    randomQuoteRespond(res, nostalgiaName)
+
 
 shuffleNames = (names) ->
     i = names.length
@@ -360,6 +372,7 @@ module.exports = (robot) ->
 
     robot.respond /Remind me of (.*)/i, msgRespond
     robot.respond /Quote (.*)/i, msgRespond
+    robot.respond /Random quote/i, randomNameAndQuoteRespond
 
     robot.respond /Start convo with (\S+)( *, *.+)+/i, convoRespond
     robot.respond /Alias (\S+) as ( *.+)+/i, aliasRespond
