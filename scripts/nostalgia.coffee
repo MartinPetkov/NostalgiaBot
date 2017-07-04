@@ -400,7 +400,7 @@ module.exports = (robot) ->
     robot.respond /give up/i, giveUpRespond
 
     robot.hear /.*that's a bug.*/i, bobRossRespond
-    robot.hear /.*(((good)? +morning)|greetings),? +@?nostalgiabot!?.*/i, greetingRespond
+    robot.hear /.*((good morning)|morning|sup|hey|hello|howdy|greetings),? +@?nostalgiabot!?.*/i, greetingRespond
 
 `// All code below from http://www.atrixnet.com/bs-generator.html, I take no credit for it
 function randomarray(a) {
