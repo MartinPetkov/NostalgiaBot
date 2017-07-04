@@ -18,7 +18,8 @@
     "hubot-rules": "^0.1.1",
     "hubot-scripts": "^2.17.2",
     "hubot-shipit": "^0.2.0",
-    "hubot-voting": "^1.0.0"
+    "hubot-voting": "^1.0.0",
+    "random-greetings": "^1.0.5"
   },
   "engines": {
     "node": "0.10.x"

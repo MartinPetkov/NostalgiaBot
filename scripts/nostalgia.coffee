@@ -25,6 +25,7 @@
 
 fs = require 'fs'
 request = require 'request'
+rg = require('random-greetings')
 
 adminsFile = 'admins.json'
 loadFile = (fileName) ->
@@ -362,6 +363,9 @@ whoDoYouRememberRespond = (res) ->
 nostalgiaphoneRespond = (res) ->
     res.send 'You rang?'
 
+greetingRespond = (res) ->
+    res.send "#{rg.greet()} @#{res.message.user.name}!"
+
 module.exports = (robot) ->
     robot.respond /Remember +(?:that )?(.+) +said +"([^"]+)"/i, rememberPerson
 
@@ -396,6 +400,7 @@ module.exports = (robot) ->
     robot.respond /give up/i, giveUpRespond
 
     robot.hear /.*that's a bug.*/i, bobRossRespond
+    robot.hear /.*(((good)? +morning)|greetings),? +@?nostalgiabot!?.*/i, greetingRespond
 
 `// All code below from http://www.atrixnet.com/bs-generator.html, I take no credit for it
 function randomarray(a) {
