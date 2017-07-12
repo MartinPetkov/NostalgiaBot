@@ -25,7 +25,8 @@
 
 fs = require 'fs'
 request = require 'request'
-rg = require('random-greetings')
+rg = require 'random-greetings'
+schedule = require 'node-schedule'
 
 adminsFile = 'admins.json'
 loadFile = (fileName) ->
@@ -85,8 +86,7 @@ msgRespond = (res) ->
     randomQuoteRespond(res, nostalgiaName)
 
 randomNameAndQuoteRespond = (res) ->
-    names = (name for name of memories)
-    nostalgiaName = res.random names
+    nostalgiaName = res.random Object.keys(memories)
 
     randomQuoteRespond(res, nostalgiaName)
 
@@ -401,6 +401,16 @@ module.exports = (robot) ->
 
     robot.hear /.*that's a bug.*/i, bobRossRespond
     robot.hear /.*((good morning)|morning|sup|hey|hello|howdy|greetings),? +@?nostalgiabot!?.*/i, greetingRespond
+
+    # Send a quote of the day
+    schedule.scheduleJob '0 0 9 * * *', () ->
+        qotd = 'Here is your Quote Of The Day™!\n\n'
+        names = Object.keys(memories)
+        randomName = names[Math.round(Math.random() * names.length)]
+        quotes = memories[randomName]
+        randomQuote = quotes[Math.round(Math.random() * quotes.length)]
+        qotd += "\"#{randomQuote}\" - #{randomName}"
+        robot.send room: process.env.GENERAL_ROOM_ID, qotd
 
 `// All code below from http://www.atrixnet.com/bs-generator.html, I take no credit for it
 function randomarray(a) {
