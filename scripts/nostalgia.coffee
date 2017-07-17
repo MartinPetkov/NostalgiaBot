@@ -406,9 +406,9 @@ module.exports = (robot) ->
     schedule.scheduleJob '0 0 9 * * *', () ->
         qotd = 'Here is your Quote Of The Day™!\n\n'
         names = Object.keys(memories)
-        randomName = names[Math.round(Math.random() * names.length)]
+        randomName = names[Math.round(Math.random() * (names.length - 1))]
         quotes = memories[randomName]
-        randomQuote = quotes[Math.round(Math.random() * quotes.length)]
+        randomQuote = quotes[Math.round(Math.random() * (quotes.length - 1))]
         qotd += "\"#{randomQuote}\" - #{randomName}"
         robot.send room: process.env.GENERAL_ROOM_ID, qotd
 
