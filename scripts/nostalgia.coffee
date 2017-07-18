@@ -403,7 +403,7 @@ module.exports = (robot) ->
     robot.hear /.*((good morning)|morning|sup|hey|hello|howdy|greetings),? +@?nostalgiabot!?.*/i, greetingRespond
 
     # Send a quote of the day
-    schedule.scheduleJob '0 0 9 * * *', () ->
+    schedule.scheduleJob '0 30 11 * * *', () ->
         qotd = 'Here is your Quote Of The Day™!\n\n'
         names = Object.keys(memories)
         randomName = names[Math.round(Math.random() * (names.length - 1))]
