@@ -434,7 +434,7 @@ module.exports = (robot) ->
     robot.respond /give up/i, giveUpRespond
 
     robot.hear /.*that's a bug.*/i, bobRossRespond
-    robot.hear /.*((good morning)|morning|sup|hey|hello|howdy|greetings),? +@?nostalgiabot!?.*/i, greetingRespond
+    robot.hear /.*((good morning)|morning|sup|hey|hello|howdy|greetings|yo|hiya|welcome|bonjour|buenas dias|buenas noches|good day|what's up|what's happening|how goes it|howdy do|shalom),? +@?nostalgiabot!?.*/i, greetingRespond
 
     # Schedule a quote of the day
     schedule.scheduleJob process.env.QOTD_SCHEDULE, quoteOfTheDaySend(robot)
