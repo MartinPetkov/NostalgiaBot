@@ -388,6 +388,19 @@ quoteOfTheDaySend = (robot) ->
         qotd += "\"#{randomQuote}\" - #{randomName}"
         robot.send room: process.env.GENERAL_ROOM_ID, qotd
 
+qotdScheduleRespond = (res) ->
+    res.send """
+    #{process.env.QOTD_SCHEDULE.replace(/\ /g, '\t')}
+    ┬\t┬\t┬\t┬\t┬\t┬
+    |\t│\t│\t│\t│\t|
+    │\t│\t│\t│\t│\t└ day of week (0 - 7) (0 or 7 is Sun)
+    │\t│\t│\t│\t└─── month (1 - 12)
+    │\t│\t│\t└────── day of month (1 - 31)
+    │\t│\t└───────── hour (0 - 23)
+    │\t└──────────── minute (0 - 59)
+    └─────────────── second (0 - 59, OPTIONAL)
+    """
+
 module.exports = (robot) ->
     robot.respond /Remember +(?:that )?(.+) +said +"([^"]+)"/i, rememberPerson
 
@@ -425,4 +438,4 @@ module.exports = (robot) ->
 
     # Schedule a quote of the day
     schedule.scheduleJob process.env.QOTD_SCHEDULE, quoteOfTheDaySend(robot)
-    robot.respond /qotd/i, (res) -> res.send process.env.QOTD_SCHEDULE
+    robot.respond /qotd/i, qotdScheduleRespond
