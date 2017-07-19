@@ -2,7 +2,8 @@
 #   Remember past employees that you miss.
 #
 # Commands:
-#   nostalgiabot (Remind me of|Quote) <person> - Digs up a memorable quote from the past.
+#   nostalgiabot Remind (me|<person>) of <person> - Digs up a memorable quote from the past, and remind the person.
+#   nostalgiabot Quote <person> - Digs up a memorable quote from the past.
 #   nostalgiabot Random quote - Dig up random memory from random person
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
@@ -38,6 +39,9 @@ toTitleCase = (str) ->
     str.replace /\w\S*/g, (txt) ->
         txt[0].toUpperCase() + txt[1..txt.length - 1].toLowerCase()
 
+isUndefined = (myvar) ->
+    return typeof myvar == 'undefined'
+
 memoryDir = "./memories"
 
 weekday = new Array(7);
@@ -62,7 +66,7 @@ rememberPast = () ->
 
 rememberPast()
 
-randomQuoteRespond = (res, nostalgiaName) ->
+randomQuoteRespond = (res, nostalgiaName, targetName) ->
     displayName = toTitleCase(nostalgiaName)
     if ! (nostalgiaName of memories)
         res.send "I don't remember #{displayName}"
@@ -78,9 +82,21 @@ randomQuoteRespond = (res, nostalgiaName) ->
         d = new Date()
         randomQuote = randomQuote.replace('$current_day', weekday[d.getDay()])
 
-    res.send "\"#{randomQuote}\" - #{displayName}"
+    response = if isUndefined(targetName) then '' else "@#{targetName} Do you remember this?\n\n"
+    response += "\"#{randomQuote}\" - #{displayName}"
+    
+    res.send response
 
-msgRespond = (res) ->
+remindRespond = (res) ->
+    targetName = res.match[1].toLowerCase().trim()
+    nostalgiaName = res.match[2].toLowerCase().trim()
+
+    if targetName.toLowerCase() == 'me'
+        targetName = res.message.user.name
+
+    randomQuoteRespond(res, nostalgiaName, targetName)
+
+quoteRespond = (res) ->
     nostalgiaName = res.match[1].toLowerCase().trim()
 
     randomQuoteRespond(res, nostalgiaName)
@@ -374,8 +390,8 @@ module.exports = (robot) ->
     robot.respond /Forget that (.+) +said +"([^"]+)"$/i, forgetMemoryRespond
     robot.respond /Reattribute "([^"]+)" from (.+) to (.+)/i, reattributeRespond
 
-    robot.respond /Remind me of (.*)/i, msgRespond
-    robot.respond /Quote (.*)/i, msgRespond
+    robot.respond /Remind (.+) of (.+)/i, remindRespond
+    robot.respond /Quote (.+)/i, quoteRespond
     robot.respond /Random quote/i, randomNameAndQuoteRespond
 
     robot.respond /Start convo with (\S+)( *, *.+)+/i, convoRespond
