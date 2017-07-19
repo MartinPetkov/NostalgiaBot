@@ -396,7 +396,7 @@ module.exports = (robot) ->
     robot.respond /Forget that (.+) +said +"([^"]+)"$/i, forgetMemoryRespond
     robot.respond /Reattribute "([^"]+)" from (.+) to (.+)/i, reattributeRespond
 
-    robot.respond /Remind (.+) of (.+)/i, remindRespond
+    robot.respond /Remind @?(.+) of (.+)/i, remindRespond
     robot.respond /Quote (.+)/i, quoteRespond
     robot.respond /Random quote/i, randomNameAndQuoteRespond
 
