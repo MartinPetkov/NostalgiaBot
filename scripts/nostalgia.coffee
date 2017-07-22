@@ -83,7 +83,7 @@ randomQuoteRespond = (res, nostalgiaName, targetName) ->
 
     response = if isUndefined(targetName) then '' else "@#{targetName} Do you remember this?\n\n"
     response += "\"#{randomQuote}\" - #{displayName}"
-    
+
     res.send response
 
 remindRespond = (res) ->
