@@ -220,6 +220,9 @@ rememberPerson = (res) ->
     nostalgiaName = res.match[1].toLowerCase().trim()
     newQuote = res.match[2]
 
+    # Filter out @all's
+    newQuote = newQuote.replace(/@all/g, "[at]all")
+
     # Make sure the messages don't contain non-alphabetical characters
     if /.*[^a-zA-Z_0-9 @].*/.test(nostalgiaName)
         res.send "I can't remember names with fancy symbols and characters"
