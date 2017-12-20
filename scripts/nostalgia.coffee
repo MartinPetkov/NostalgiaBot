@@ -7,7 +7,7 @@
 #   nostalgiabot Random quote - Dig up random memory from random person
 #   nostalgiabot Remember that <person> said "<quote>" - Stores a new quote, to forever remain in the planes of Nostalgia.
 #   nostalgiabot Who do you remember? - See the memories the NostalgiaBot holds on to.
-#   nostalgiabot Start convo with <person1>, <person2> [, <person3>...] - Start a nonsensical convo
+#   nostalgiabot Converse <person1>, <person2> [, <person3>...] - Start a nonsensical convo
 #   nostalgiabot Alias <name> as <alias1> [<alias2> ...] - Add nicknames to the memorees
 #   nostalgiabot Start Guess Who - Start a game of Guess Who!
 #   nostalgiabot Show Guess Who - Show the current quote to guess
@@ -119,6 +119,10 @@ convoRespond = (res) ->
     fixedNames = []
     for name in allNames
         name = name.toLowerCase().trim()
+        # Remove @s at the front
+        if name[0] == '@'
+            name = name.substr(1)
+
         fixedNames.push name
     allNames = fixedNames
 
@@ -416,7 +420,7 @@ module.exports = (robot) ->
     robot.respond /Quote (.+)/i, quoteRespond
     robot.respond /Random quote/i, randomNameAndQuoteRespond
 
-    robot.respond /Start convo with (\S+)( *, *.+)+/i, convoRespond
+    robot.respond /Converse (\S+)( *, *.+)+/i, convoRespond
     robot.respond /Alias (\S+) as ( *.+)+/i, aliasRespond
 
     robot.respond /Hacker me/i, hackerRespond
