@@ -410,6 +410,7 @@ qotdScheduleRespond = (res) ->
 
 module.exports = (robot) ->
     robot.respond /Remember +(?:that )?(.+) +said +"([^"]+)"/i, rememberPerson
+    robot.respond /Remember +(?:that )?(.+) +said +“([^“”]+)”/i, rememberPerson
 
     # Admin functions
     robot.respond /Forget (\S+)$/i, forgetPersonRespond
