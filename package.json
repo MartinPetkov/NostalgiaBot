@@ -5,7 +5,8 @@
   "author": "Martin Petkov <mpetkov@securitycompass.com>",
   "description": "A bot to remind us of our dear lost interns",
   "dependencies": {
-    "hubot": "^2.19.0",
+    "coffee-script": "^1.12.7",
+    "hubot": "^3.3.2",
     "hubot-diagnostics": "0.0.1",
     "hubot-google-images": "^0.2.7",
     "hubot-google-translate": "^0.2.1",
