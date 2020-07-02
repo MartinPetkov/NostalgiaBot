@@ -16,7 +16,7 @@
     "hubot-maps": "0.0.2",
     "hubot-pugme": "^0.1.1",
     "hubot-redis-brain": "1.0.0",
-    "hubot-rules": "^0.1.2",
+    "hubot-rules": "^1.0.0",
     "hubot-scripts": "^2.17.2",
     "hubot-shipit": "^0.2.1",
     "hubot-telegram": "^0.1.2",
